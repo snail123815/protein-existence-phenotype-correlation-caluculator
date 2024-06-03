@@ -12,14 +12,10 @@ from pathlib import Path
 from Bio import SeqIO
 from tqdm import tqdm
 
-REF = "ATMOS43"  # not used in step_0
-MIN_PROTEIN_LEN = 60
-EXP_DATA = Path("tested_strains_202403")
+from project_settings import (DB_F, EXP_DATA, MBT_COLL_P, MIN_PROTEIN_LEN,
+                              PROJ_PROTEOMES_P, STRAINS_PICKLE)
 
-MBT_COLL_P = Path("MBT-collections/collective-faa/")
-PROJ_PROTEOMES_P = Path("all_proteomes/")
-DB_F = Path("all_proteomes_db") / "all_proteomes.fasta"
-STRAINS_PICKLE = Path("step_0_gather_proteome_strains.pickle")
+# STRAINS_PICKLE = Path("step_0_gather_proteome_strains.pickle")
 # Saves a dict of dict:
 # {
 #    "Double conj.": strains_doubleconj,

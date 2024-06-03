@@ -1,23 +1,16 @@
-import pickle
 import gzip
-from pathlib import Path
+import pickle
 from subprocess import run
 
-from step_0_gather_proteome import DB_F, STRAINS_PICKLE, REF
+from project_settings import (DB_F, DOMTBLOUT_P, NCPU, REF, STRAINS_PICKLE,
+                              T_DOME, T_E, T_INCDOME, T_INCE)
 
-T_E = 1e-5
-T_INCE = 1e-10
-T_DOME = 1e-5
-T_INCDOME = 1e-10
-NCPU = 16
-
-DOMTBLOUT_P = Path("domtblout.txt")
 REF_NEXT_LOC = 0
 # Used if the program died in the middle. Use `get_location.py`
 # to get where the program lefted out.
 
 if __name__ == "__main__":
-    with STRAINS_PICKLE.open('rb') as sp:
+    with STRAINS_PICKLE.open("rb") as sp:
         strains_paths_dict = pickle.load(sp)
 
     strains_doubleconj = strains_paths_dict["Double conj."]
@@ -25,7 +18,7 @@ if __name__ == "__main__":
     strains_noconj = strains_paths_dict["No conj."]
 
     ref_proteome_p = strains_doubleconj[REF]
-    with gzip.open(ref_proteome_p, 'rt') as ref:
+    with gzip.open(ref_proteome_p, "rt") as ref:
         ref.seek(REF_NEXT_LOC)
         jackhmmer_run = run(
             (

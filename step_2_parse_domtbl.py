@@ -20,27 +20,16 @@ from threading import Thread
 import pandas as pd
 from tqdm import tqdm
 
-from step_1_jackhmmer import DOMTBLOUT_P
+from project_settings import (DOMTBLOUT_P, GATHER_DOMTBL_P, GATHER_MATCH_P,
+                              GATHER_T_COV, GATHER_T_DOME, GATHER_T_E,
+                              LEN_DIFF, NCPU)
 
 # DOMTBLOUT_P = Path("domtblout_nodup.txt")
 # DOMTBLOUT_P = Path("domtblout_partial.txt")
 # DOMTBLOUT_P = Path("domtblout_partial_nodup.txt")
 
-GATHER_T_E = 1e-10
-GATHER_T_DOME = 1e-20
-GATHER_T_COV = 0.7
-WORKERS = 12
-LEN_DIFF = 0.2  # diff / min(qlen, tlen)
 
 # Output pathes
-GATHER_DOMTBL_P = DOMTBLOUT_P.parent / (
-    f"{DOMTBLOUT_P.stem}_E{str(GATHER_T_E)}"
-    f"_DOME{str(GATHER_T_DOME)}_COV{str(GATHER_T_COV)}_LDIF{str(LEN_DIFF)}.tsv"
-)
-GATHER_MATCH_P = DOMTBLOUT_P.parent / (
-    f"{DOMTBLOUT_P.stem}_matches_E{str(GATHER_T_E)}"
-    f"_DOME{str(GATHER_T_DOME)}_COV{str(GATHER_T_COV)}_LDIF{str(LEN_DIFF)}.tsv"
-)
 
 
 def cal_cov(line: dict, dom_cov_regions: list[int]):
@@ -191,7 +180,7 @@ def process_single_query(domtbl_q: list[OrderedDict]):
 def parse_dom_table_mt(domtbl_df):
     previous_qp = ""
     domtbl_q: list[namedtuple] = []
-    with ProcessPoolExecutor(WORKERS) as executer:
+    with ProcessPoolExecutor(NCPU) as executer:
         futures = []
         for domrow in tqdm(
             domtbl_df.itertuples(),

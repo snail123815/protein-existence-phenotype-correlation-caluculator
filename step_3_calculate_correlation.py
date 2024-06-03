@@ -8,20 +8,17 @@ by for example measurement limitation. Then we can treat the phenotype binary,
 use point-biserial correlation.
 """
 
-import pickle
 import gzip
-from pathlib import Path
+import pickle
 
-import pandas as pd
 import numpy as np
-from tqdm import tqdm
-from scipy.stats import pearsonr, pointbiserialr
+import pandas as pd
 from Bio import SeqIO
+from scipy.stats import pearsonr, pointbiserialr
+from tqdm import tqdm
 
-from step_0_gather_proteome import STRAINS_PICKLE, REF
-from step_2_parse_domtbl import GATHER_MATCH_P
-
-PRESENCE_TABLE_P = Path(f"{GATHER_MATCH_P.stem}_presence.tsv")
+from project_settings import (GATHER_MATCH_P, PRESENCE_TABLE_P, REF,
+                              STRAINS_PICKLE)
 
 
 def load_experimental_data():
@@ -100,7 +97,7 @@ def cal_pointbiserialr(
 
     correlation_df = pd.DataFrame(correlation_dict).T
     correlation_df.columns = ["point_biserial_Corr.", "p"]
-    correlation_df.index.name = 'gene'
+    correlation_df.index.name = "gene"
 
     return correlation_df
 
@@ -134,7 +131,7 @@ def cal_step_pearsonr(
 
     correlation_df = pd.DataFrame(correlation_dict).T
     correlation_df.columns = ["point_biserial_Corr.", "p"]
-    correlation_df.index.name = 'gene'
+    correlation_df.index.name = "gene"
 
     return correlation_df
 
