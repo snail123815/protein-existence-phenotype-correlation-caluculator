@@ -4,6 +4,7 @@ MBT-collections
 all_proteomes_db
 tested_strains_202403
 .vscode
+*.pickle
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
