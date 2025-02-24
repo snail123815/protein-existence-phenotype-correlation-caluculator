@@ -1,11 +1,12 @@
-import json
 from pathlib import Path
 
-with open(Path(__file__).parent / "config_jackhmmer_thresholds.json") as f:
-    thresholds_config = json.load(f)
+import yaml
 
-with open(Path(__file__).parent / "config_project.json") as f:
-    project_config = json.load(f)
+with open(Path(__file__).parent / "config_jackhmmer_thresholds.yaml") as f:
+    thresholds_config = yaml.safe_load(f)
+
+with open(Path(__file__).parent / "config_project.yaml") as f:
+    project_config = yaml.safe_load(f)
 
 MIN_PROTEIN_LEN = thresholds_config["MIN_PROTEIN_LEN"]
 T_E = thresholds_config["T_E"]

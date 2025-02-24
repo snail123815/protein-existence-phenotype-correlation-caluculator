@@ -1,0 +1,25 @@
+NCPU: 16
+TARGET_STRAIN: "MBT1"
+PHENOTYPE_TABLE_FILE: "tested_strains_202403"
+# Contains the list of strains and their experimental data.
+# Current format:
+# MBT1|phenotype no.2
+# MBT2|phenotype no.1
+# Target *tsv* format:
+# ID Phenotype1 Phenotype2 Phenotype3...
+# strain1 1 0 1 ...
+# strain2 1 1 0 ...
+# ...
+SOURCE_DATABASE_DIR: "proteome_collections/collective-faa/"
+# Contains the target proteome databases. File names are '*.faa.gz'.
+TEMP_PROTEOMICS_IN_TABLE_DIR: "all_proteomes/"
+# Symbolic links to target proteome databases are created here.
+# Contains all tested strains' proteomes.
+CONCATENATED_PROTEOMES_FILE: "all_proteomes_db/all_proteomes.fasta"
+# Concatenated proteomes of all tested strains
+# (no duplicate IDs). Used as jackhmmer db.
+STRAINS_PICKLE_FILE: "step_0_gather_proteome_strains.pickle"
+# Stores a dict {phenotype: strains}.
+DOMTBLOUT_FILE: "domtblout.txt"
+# Output of jackhmmer.
+# Contains domain hits of the target strain proteins.
