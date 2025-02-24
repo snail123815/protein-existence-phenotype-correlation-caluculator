@@ -17,30 +17,30 @@ from Bio import SeqIO
 from scipy.stats import pearsonr, pointbiserialr
 from tqdm import tqdm
 
-from project_settings import (GATHER_MATCH_P, PRESENCE_TABLE_P, REF,
-                              STRAINS_PICKLE)
+from project_settings import (GATHER_MATCH_TSV, PRESENCE_TSV, TARGET_STRAIN,
+                              STRAINS_PICKLE_FILE)
 
 
 def load_experimental_data():
     # Load experimental data:
-    with open(STRAINS_PICKLE, "rb") as handle:
+    with open(STRAINS_PICKLE_FILE, "rb") as handle:
         experimental = pickle.load(handle)
 
     all_strains = {}
     for phenotype in experimental:
         all_strains.update(experimental[phenotype])
 
-    with gzip.open(all_strains[REF], "rt") as handle:
+    with gzip.open(all_strains[TARGET_STRAIN], "rt") as handle:
         all_ref_prots = [s.id for s in SeqIO.parse(handle, "fasta")]
 
     return all_ref_prots, experimental, all_strains
 
 
 def gen_presense_absence_table(
-    ref_prots, strains, match_table_p=GATHER_MATCH_P
+    ref_prots, strains, match_table_p=GATHER_MATCH_TSV
 ) -> pd.DataFrame:
-    print(f"Reading match data {GATHER_MATCH_P}")
-    match_df = pd.read_csv(GATHER_MATCH_P, sep="\t", index_col=0, header=0)
+    print(f"Reading match data {GATHER_MATCH_TSV}")
+    match_df = pd.read_csv(GATHER_MATCH_TSV, sep="\t", index_col=0, header=0)
     presence_df = pd.DataFrame(
         np.zeros((len(ref_prots), len(strains)), dtype=int),
         index=pd.Index(sorted(ref_prots), name="gene"),
@@ -138,15 +138,15 @@ def cal_step_pearsonr(
 
 if __name__ == "__main__":
     all_ref_prots, experimental, all_strains = load_experimental_data()
-    if not PRESENCE_TABLE_P.exists():
+    if not PRESENCE_TSV.exists():
         presence_df = gen_presense_absence_table(
             all_ref_prots, list(all_strains.keys())
         )
-        print(f"Writing presence table {PRESENCE_TABLE_P}.")
-        presence_df.to_csv(PRESENCE_TABLE_P, sep="\t")
+        print(f"Writing presence table {PRESENCE_TSV}.")
+        presence_df.to_csv(PRESENCE_TSV, sep="\t")
     else:
-        print(f"Found presence table, read from {PRESENCE_TABLE_P}")
-        presence_df = pd.read_csv(PRESENCE_TABLE_P, sep="\t", index_col=0)
+        print(f"Found presence table, read from {PRESENCE_TSV}")
+        presence_df = pd.read_csv(PRESENCE_TSV, sep="\t", index_col=0)
 
     pointbiseral_corr_df_conj = cal_pointbiserialr(
         ["Double conj.", "Single conj."], experimental, presence_df

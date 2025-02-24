@@ -12,8 +12,14 @@ from pathlib import Path
 from Bio import SeqIO
 from tqdm import tqdm
 
-from project_settings import (DB_F, EXP_DATA, MBT_COLL_P, MIN_PROTEIN_LEN,
-                              PROJ_PROTEOMES_P, STRAINS_PICKLE)
+from project_settings import (
+    CONCATENATED_PROTEOMES_FILE,
+    PHENOTYPE_TABLE_FILE,
+    SOURCE_DATABASE_DIR,
+    MIN_PROTEIN_LEN,
+    TEMP_PROTEOMICS_IN_TABLE_DIR,
+    STRAINS_PICKLE_FILE,
+)
 
 # STRAINS_PICKLE = Path("step_0_gather_proteome_strains.pickle")
 # Saves a dict of dict:
@@ -30,10 +36,14 @@ if __name__ == "__main__":
     strains_singleconj = {}
     strains_doubleconj = {}
 
-    for f in PROJ_PROTEOMES_P.iterdir():
-        f.unlink()
+    # Remove all files in TEMP_PROTEOMICS_IN_TABLE_DIR
+    if TEMP_PROTEOMICS_IN_TABLE_DIR.exists():
+        for f in TEMP_PROTEOMICS_IN_TABLE_DIR.iterdir():
+            f.unlink()
+    else:
+        TEMP_PROTEOMICS_IN_TABLE_DIR.mkdir()
 
-    with EXP_DATA.open() as expdata:
+    with PHENOTYPE_TABLE_FILE.open() as expdata:
         for i, l in enumerate(expdata):
             strain, exp = l.split("|")
             strain = strain.strip()
@@ -48,32 +58,34 @@ if __name__ == "__main__":
                 case _:
                     print(f"Case {exp} not known")
 
-        print(f"Total lines in {EXP_DATA}: {i+1}")
+        print(f"Total lines in {PHENOTYPE_TABLE_FILE}: {i+1}")
 
     for strains in [strains_doubleconj, strains_noconj, strains_singleconj]:
         for st in list(strains.keys()):
             found = False
-            for f in MBT_COLL_P.glob("*.faa.gz"):
+            for f in SOURCE_DATABASE_DIR.glob("*.faa.gz"):
                 if st in re.split(r"_|\.", f.name):
                     strains[st] = f
                     # print(f'Strain {st} path {f}')
                     found = True
-                    (PROJ_PROTEOMES_P / f.name).symlink_to(
-                        f.relative_to(PROJ_PROTEOMES_P, walk_up=True)
+                    (TEMP_PROTEOMICS_IN_TABLE_DIR / f.name).symlink_to(
+                        f.relative_to(
+                            TEMP_PROTEOMICS_IN_TABLE_DIR, walk_up=True
+                        )
                     )
                     break
             if not found:
                 print(f"Proteome of strain {st} not found.")
                 strains.pop(st)
 
-    DB_F.parent.mkdir(exist_ok=True)
+    CONCATENATED_PROTEOMES_FILE.parent.mkdir(exist_ok=True)
 
     print("Making database fasta:")
     for phenotype, strains in zip(
         ["Double conj.", "Single conj.", "No conj."],
         [strains_doubleconj, strains_singleconj, strains_noconj],
     ):
-        with DB_F.open("at") as db_handle:
+        with CONCATENATED_PROTEOMES_FILE.open("at") as db_handle:
             for st in tqdm(strains, desc=phenotype):
                 proteome_p = strains[st]
                 with gzip.open(strains[st], "rt") as source:
@@ -85,11 +97,11 @@ if __name__ == "__main__":
                         prots.append(prot)
                     SeqIO.write(prots, db_handle, "fasta")
 
-    print(f"Database fasta file {DB_F}.")
-    if STRAINS_PICKLE.exists():
-        STRAINS_PICKLE.unlink()
-    STRAINS_PICKLE.touch()
-    with STRAINS_PICKLE.open("wb") as sp:
+    print(f"Database fasta file {CONCATENATED_PROTEOMES_FILE}.")
+    if STRAINS_PICKLE_FILE.exists():
+        STRAINS_PICKLE_FILE.unlink()
+    STRAINS_PICKLE_FILE.touch()
+    with STRAINS_PICKLE_FILE.open("wb") as sp:
         pickle.dump(
             {
                 "Double conj.": strains_doubleconj,

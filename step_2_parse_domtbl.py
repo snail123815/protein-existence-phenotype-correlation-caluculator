@@ -20,7 +20,7 @@ from threading import Thread
 import pandas as pd
 from tqdm import tqdm
 
-from project_settings import (DOMTBLOUT_P, GATHER_DOMTBL_P, GATHER_MATCH_P,
+from project_settings import (DOMTBLOUT_FILE, GATHER_DOMTBL_TSV, GATHER_MATCH_TSV,
                               GATHER_T_COV, GATHER_T_DOME, GATHER_T_E,
                               LEN_DIFF, NCPU)
 
@@ -209,15 +209,15 @@ def parse_dom_table_mt(domtbl_df):
 
 
 if __name__ == "__main__":
-    if "nodup" in str(DOMTBLOUT_P):
-        nodup_domtbl = DOMTBLOUT_P
+    if "nodup" in str(DOMTBLOUT_FILE):
+        nodup_domtbl = DOMTBLOUT_FILE
     else:
-        nodup_domtbl = remove_duplicates(DOMTBLOUT_P)
+        nodup_domtbl = remove_duplicates(DOMTBLOUT_FILE)
     domtbl_df = read_domtbl(nodup_domtbl)
-    print(f"Write re-formated domain hit table {GATHER_DOMTBL_P}")
+    print(f"Write re-formated domain hit table {GATHER_DOMTBL_TSV}")
 
     def write_reformated_domtbl():
-        domtbl_df.to_csv(GATHER_DOMTBL_P, sep="\t")
+        domtbl_df.to_csv(GATHER_DOMTBL_TSV, sep="\t")
 
     write_reformated_domtbl_thread = Thread(target=write_reformated_domtbl)
     write_reformated_domtbl_thread.start()
@@ -229,5 +229,5 @@ if __name__ == "__main__":
         == 0
     )
     write_reformated_domtbl_thread.join()
-    print(f"Write match table {GATHER_MATCH_P}")
-    match_df.to_csv(GATHER_MATCH_P, sep="\t")
+    print(f"Write match table {GATHER_MATCH_TSV}")
+    match_df.to_csv(GATHER_MATCH_TSV, sep="\t")
