@@ -11,7 +11,7 @@ import re
 from Bio import SeqIO
 from tqdm import tqdm
 
-from project_settings import (
+from load_configs import (
     CONCATENATED_PROTEOMES_FILE,
     MIN_PROTEIN_LEN,
     PHENOTYPE_TABLE_FILE,

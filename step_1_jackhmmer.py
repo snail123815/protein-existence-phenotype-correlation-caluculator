@@ -2,8 +2,17 @@ import gzip
 import pickle
 from subprocess import run
 
-from project_settings import (CONCATENATED_PROTEOMES_FILE, DOMTBLOUT_FILE, NCPU, TARGET_STRAIN, STRAINS_PICKLE_FILE,
-                              T_DOME, T_E, T_INCDOME, T_INCE)
+from load_configs import (
+    CONCATENATED_PROTEOMES_FILE,
+    DOMTBLOUT_FILE,
+    NCPU,
+    STRAINS_PICKLE_FILE,
+    T_DOME,
+    T_E,
+    T_INCDOME,
+    T_INCE,
+    TARGET_STRAIN,
+)
 
 REF_NEXT_LOC = 0
 # Used if the program died in the middle. Use `get_location.py`

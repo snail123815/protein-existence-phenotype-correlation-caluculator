@@ -20,9 +20,16 @@ from threading import Thread
 import pandas as pd
 from tqdm import tqdm
 
-from project_settings import (DOMTBLOUT_FILE, GATHER_DOMTBL_TSV, GATHER_MATCH_TSV,
-                              GATHER_T_COV, GATHER_T_DOME, GATHER_T_E,
-                              LEN_DIFF, NCPU)
+from load_configs import (
+    DOMTBLOUT_FILE,
+    GATHER_DOMTBL_TSV,
+    GATHER_MATCH_TSV,
+    GATHER_T_COV,
+    GATHER_T_DOME,
+    GATHER_T_E,
+    LEN_DIFF,
+    NCPU,
+)
 
 # DOMTBLOUT_P = Path("domtblout_nodup.txt")
 # DOMTBLOUT_P = Path("domtblout_partial.txt")

@@ -17,8 +17,12 @@ from Bio import SeqIO
 from scipy.stats import pearsonr, pointbiserialr
 from tqdm import tqdm
 
-from project_settings import (GATHER_MATCH_TSV, PRESENCE_TSV, TARGET_STRAIN,
-                              STRAINS_PICKLE_FILE)
+from load_configs import (
+    GATHER_MATCH_TSV,
+    PRESENCE_TSV,
+    STRAINS_PICKLE_FILE,
+    TARGET_STRAIN,
+)
 
 
 def load_experimental_data():
