@@ -1,50 +1,35 @@
+import json
 from pathlib import Path
 
-NCPU = 16
+with open(Path(__file__).parent / "config_jackhmmer_thresholds.json") as f:
+    thresholds_config = json.load(f)
 
-MIN_PROTEIN_LEN = 60
-T_E = 1e-5
-T_INCE = 1e-10
-T_DOME = 1e-5
-T_INCDOME = 1e-10
-GATHER_T_E = 1e-10
-GATHER_T_DOME = 1e-20
-GATHER_T_COV = 0.7
-LEN_DIFF = 0.2  # diff / min(qlen, tlen)
+with open(Path(__file__).parent / "config_project.json") as f:
+    project_config = json.load(f)
 
-TARGET_STRAIN = "ATMOS43"
-# Target strain, all of its proteins will be used, form rows in the
-# presence table.
+MIN_PROTEIN_LEN = thresholds_config["MIN_PROTEIN_LEN"]
+T_E = thresholds_config["T_E"]
+T_INCE = thresholds_config["T_INCE"]
+T_DOME = thresholds_config["T_DOME"]
+T_INCDOME = thresholds_config["T_INCDOME"]
+GATHER_T_E = thresholds_config["GATHER_T_E"]
+GATHER_T_DOME = thresholds_config["GATHER_T_DOME"]
+GATHER_T_COV = thresholds_config["GATHER_T_COV"]
+LEN_DIFF = thresholds_config["LEN_DIFF"]
 
-PHENOTYPE_TABLE_FILE = Path("tested_strains_202403")
-# Contains the list of strains and their experimental data.
-# Current format:
-# MBT1|no conj.
-# Target format:
-# ID      Phenotype1      Phenotype2      ...
-# MBT1    1    1    0
+NCPU = project_config["NCPU"]
+TARGET_STRAIN = project_config["TARGET_STRAIN"]
+PHENOTYPE_TABLE_FILE = Path(project_config["PHENOTYPE_TABLE_FILE"])
+SOURCE_DATABASE_DIR = Path(project_config["SOURCE_DATABASE_DIR"])
+TEMP_PROTEOMICS_IN_TABLE_DIR = Path(
+    project_config["TEMP_PROTEOMICS_IN_TABLE_DIR"]
+)
+CONCATENATED_PROTEOMES_FILE = Path(
+    project_config["CONCATENATED_PROTEOMES_FILE"]
+)
+STRAINS_PICKLE_FILE = Path(project_config["STRAINS_PICKLE_FILE"])
+DOMTBLOUT_FILE = Path(project_config["DOMTBLOUT_FILE"])
 
-SOURCE_DATABASE_DIR = Path("MBT-collections/collective-faa/")
-# Contains the target proteome databases. The tested strains in phenotype table
-# should be present in this directory. File names are "*.faa.gz".
-
-TEMP_PROTEOMICS_IN_TABLE_DIR = Path("all_proteomes/")
-# Will generate this directory if not present. Symbolic links will be created
-# pointing to the target proteome databases. As a result, it should contains
-# the proteomes of all tested strains, including the target strain.
-
-CONCATENATED_PROTEOMES_FILE = Path("all_proteomes_db") / "all_proteomes.fasta"
-# Concatenated proteomes of all tested strains. Used as the database for
-# jackhmmer. There should be no duplicate protein IDs in this file.
-
-STRAINS_PICKLE_FILE = Path("step_0_gather_proteome_strains.pickle")
-# Currently stores a dict of {phenotype: strains}
-
-DOMTBLOUT_FILE = Path("domtblout.txt")
-# Output of jackhmmer. Contains the domain hits of the target strain proteins.
-# Will be used to generate the presence table.
-
-# Some output files with generated file names based on the settings.
 GATHER_DOMTBL_TSV = DOMTBLOUT_FILE.parent / (
     f"{DOMTBLOUT_FILE.stem}_E{str(GATHER_T_E)}"
     f"_DOME{str(GATHER_T_DOME)}_COV{str(GATHER_T_COV)}_LDIF{str(LEN_DIFF)}.tsv"

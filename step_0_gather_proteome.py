@@ -7,18 +7,17 @@
 import gzip
 import pickle
 import re
-from pathlib import Path
 
 from Bio import SeqIO
 from tqdm import tqdm
 
 from project_settings import (
     CONCATENATED_PROTEOMES_FILE,
+    MIN_PROTEIN_LEN,
     PHENOTYPE_TABLE_FILE,
     SOURCE_DATABASE_DIR,
-    MIN_PROTEIN_LEN,
-    TEMP_PROTEOMICS_IN_TABLE_DIR,
     STRAINS_PICKLE_FILE,
+    TEMP_PROTEOMICS_IN_TABLE_DIR,
 )
 
 # STRAINS_PICKLE = Path("step_0_gather_proteome_strains.pickle")
