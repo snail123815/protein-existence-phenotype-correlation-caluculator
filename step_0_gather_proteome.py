@@ -1,13 +1,14 @@
-# Read tested_strains file, get 3 lists:
-# 1. Double conj.
-# 2. Single conj.
-# 3. No conj.
+# Read tested_strains TSV file with headers, get phenotype lists dynamically:
+# Format: ID\tPhenotype1\tPhenotype2\t...
+#         strain1\t1\t0\t...
+#         strain2\t1\t1\t...
 # Then, make a database containing only *all tested strains*
 
 import gzip
 import pickle
 import re
 
+import pandas as pd
 from Bio import SeqIO
 from tqdm import tqdm
 
@@ -23,18 +24,17 @@ from load_configs import (
 # STRAINS_PICKLE = Path("step_0_gather_proteome_strains.pickle")
 # Saves a dict of dict:
 # {
-#    "Double conj.": strains_doubleconj,
-#    "Single conj.": strains_singleconj,
-#    "No conj.": strains_noconj,
+#    "Phenotype1": {"strain1": PosixPath("..."), "strain2": PosixPath("...")},
+#    "Phenotype2": {"strain3": PosixPath("..."), "strain4": PosixPath("...")},
+#    ...
 # }
-# With each {"MBT1": PosixPath("MBT-collection/collective-faa/MBT1.fa.gz")}
+# With each strain mapped to its proteome file path
 
 if __name__ == "__main__":
-    strains_noconj = {}
-    # {"MBT1": PosixPath("MBT-collection/collective-faa/MBT1.fa.gz")}
-    strains_singleconj = {}
-    strains_doubleconj = {}
-
+    # Dictionary to store strains for each phenotype
+    # Structure: {"Phenotype1": {"strain1": "", "strain2": ""}, ...}
+    phenotype_strains = {}
+    
     # Remove all files in TEMP_PROTEOMICS_IN_TABLE_DIR
     if TEMP_PROTEOMICS_IN_TABLE_DIR.exists():
         for f in TEMP_PROTEOMICS_IN_TABLE_DIR.iterdir():
@@ -42,24 +42,34 @@ if __name__ == "__main__":
     else:
         TEMP_PROTEOMICS_IN_TABLE_DIR.mkdir()
 
-    with PHENOTYPE_TABLE_FILE.open() as expdata:
-        for i, l in enumerate(expdata):
-            strain, exp = l.split("|")
-            strain = strain.strip()
-            exp = exp.strip()
-            match exp:
-                case "no conj.":
-                    strains_noconj[strain] = ""
-                case "Single AA conj.":
-                    strains_singleconj[strain] = ""
-                case "di-peptide conj.":
-                    strains_doubleconj[strain] = ""
-                case _:
-                    print(f"Case {exp} not known")
+    # Read the TSV file using pandas
+    df = pd.read_csv(PHENOTYPE_TABLE_FILE, sep='\t', index_col=0)
+    
+    # Convert all columns to numeric, replacing non-numeric values with NaN
+    for col in df.columns:
+        df[col] = pd.to_numeric(df[col], errors='coerce')
+    
+    # Get phenotype names from column headers
+    phenotype_names = df.columns.tolist()
+    
+    # Initialize dictionaries for each phenotype
+    for phenotype in phenotype_names:
+        phenotype_strains[phenotype] = {}
+    
+    # Process each strain (row) and phenotype (column)
+    for strain in df.index:
+        for phenotype in phenotype_names:
+            value = df.loc[strain, phenotype]
+            if pd.notna(value) and isinstance(value, (int, float)) and value > 0:
+                phenotype_strains[phenotype][strain] = float(value)
+    
+    print(f"Total strains in {PHENOTYPE_TABLE_FILE}: {len(df)}")
+    print(f"Phenotypes found: {phenotype_names}")
+    for phenotype, strains in phenotype_strains.items():
+        print(f"  {phenotype}: {len(strains)} strains")
 
-        print(f"Total lines in {PHENOTYPE_TABLE_FILE}: {i+1}")
-
-    for strains in [strains_doubleconj, strains_noconj, strains_singleconj]:
+    # Find proteome files for each strain in each phenotype
+    for phenotype_name, strains in phenotype_strains.items():
         for st in list(strains.keys()):
             found = False
             for f in SOURCE_DATABASE_DIR.glob("*.faa.gz"):
@@ -80,12 +90,9 @@ if __name__ == "__main__":
     CONCATENATED_PROTEOMES_FILE.parent.mkdir(exist_ok=True)
 
     print("Making database fasta:")
-    for phenotype, strains in zip(
-        ["Double conj.", "Single conj.", "No conj."],
-        [strains_doubleconj, strains_singleconj, strains_noconj],
-    ):
+    for phenotype_name, strains in phenotype_strains.items():
         with CONCATENATED_PROTEOMES_FILE.open("at") as db_handle:
-            for st in tqdm(strains, desc=phenotype):
+            for st in tqdm(strains, desc=phenotype_name):
                 proteome_p = strains[st]
                 with gzip.open(strains[st], "rt") as source:
                     prots = []
@@ -101,11 +108,4 @@ if __name__ == "__main__":
         STRAINS_PICKLE_FILE.unlink()
     STRAINS_PICKLE_FILE.touch()
     with STRAINS_PICKLE_FILE.open("wb") as sp:
-        pickle.dump(
-            {
-                "Double conj.": strains_doubleconj,
-                "Single conj.": strains_singleconj,
-                "No conj.": strains_noconj,
-            },
-            sp,
-        )
+        pickle.dump(phenotype_strains, sp)
