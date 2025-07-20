@@ -34,7 +34,7 @@ if __name__ == "__main__":
     # Dictionary to store strains for each phenotype
     # Structure: {"Phenotype1": {"strain1": "", "strain2": ""}, ...}
     phenotype_strains = {}
-    
+
     # Remove all files in TEMP_PROTEOMICS_IN_TABLE_DIR
     if TEMP_PROTEOMICS_IN_TABLE_DIR.exists():
         for f in TEMP_PROTEOMICS_IN_TABLE_DIR.iterdir():
@@ -43,26 +43,30 @@ if __name__ == "__main__":
         TEMP_PROTEOMICS_IN_TABLE_DIR.mkdir()
 
     # Read the TSV file using pandas
-    df = pd.read_csv(PHENOTYPE_TABLE_FILE, sep='\t', index_col=0)
-    
+    df = pd.read_csv(PHENOTYPE_TABLE_FILE, sep="\t", index_col=0)
+
     # Convert all columns to numeric, replacing non-numeric values with NaN
     for col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors='coerce')
-    
+        df[col] = pd.to_numeric(df[col], errors="raise")
+
     # Get phenotype names from column headers
     phenotype_names = df.columns.tolist()
-    
+
     # Initialize dictionaries for each phenotype
     for phenotype in phenotype_names:
         phenotype_strains[phenotype] = {}
-    
+
     # Process each strain (row) and phenotype (column)
     for strain in df.index:
         for phenotype in phenotype_names:
             value = df.loc[strain, phenotype]
-            if pd.notna(value) and isinstance(value, (int, float)) and value > 0:
+            if (
+                pd.notna(value)
+                and isinstance(value, (int, float))
+                and value > 0
+            ):
                 phenotype_strains[phenotype][strain] = float(value)
-    
+
     print(f"Total strains in {PHENOTYPE_TABLE_FILE}: {len(df)}")
     print(f"Phenotypes found: {phenotype_names}")
     for phenotype, strains in phenotype_strains.items():
