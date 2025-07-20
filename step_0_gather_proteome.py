@@ -21,6 +21,36 @@ from load_configs import (
     TEMP_PROTEOMICS_IN_TABLE_DIR,
 )
 
+
+def handle_missing_proteome(strain_name):
+    """
+    Handle missing proteome files by asking user for input.
+
+    Args:
+        strain_name (str): Name of the strain with missing proteome
+
+    Returns:
+        bool: True to continue, False to exit
+    """
+    print(f"\nWARNING: Proteome of strain '{strain_name}' not found.")
+    while True:
+        choice = (
+            input("Do you want to continue without this strain? (y/n/a): ")
+            .lower()
+            .strip()
+        )
+        if choice in ["y", "yes"]:
+            return True
+        elif choice in ["n", "no"]:
+            print("Exiting program...")
+            return False
+        elif choice in ["a", "all"]:
+            print("Continuing with all missing strains...")
+            return "all"
+        else:
+            print("Please enter 'y' (yes), 'n' (no), or 'a' (all missing).")
+
+
 # STRAINS_PICKLE = Path("step_0_gather_proteome_strains.pickle")
 # Saves a dict of dict:
 # {
@@ -65,6 +95,7 @@ if __name__ == "__main__":
         print(f"  {phenotype}: {len(strains)} strains")
 
     # Find proteome files for each strain in each phenotype
+    continue_all_missing = False  # Flag to auto-continue for all missing files
     for phenotype_name, strains in phenotype_strains.items():
         for st in list(strains.keys()):
             found = False
@@ -80,8 +111,17 @@ if __name__ == "__main__":
                     )
                     break
             if not found:
-                print(f"Proteome of strain {st} not found.")
-                strains.pop(st)
+                continue_anyway = True
+                if not continue_all_missing:
+                    continue_anyway = handle_missing_proteome(st)
+                    if continue_anyway is False:
+                        # User chose to exit
+                        exit(1)
+                    elif continue_anyway == "all":
+                        continue_all_missing = True
+                if continue_anyway or continue_all_missing:
+                    print(f"Skipping strain {st} (missing proteome).")
+                    strains.pop(st)
 
     CONCATENATED_PROTEOMES_FILE.parent.mkdir(exist_ok=True)
 
