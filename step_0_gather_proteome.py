@@ -43,11 +43,7 @@ if __name__ == "__main__":
         TEMP_PROTEOMICS_IN_TABLE_DIR.mkdir()
 
     # Read the TSV file using pandas
-    df = pd.read_csv(PHENOTYPE_TABLE_FILE, sep="\t", index_col=0)
-
-    # Convert all columns to numeric, replacing non-numeric values with NaN
-    for col in df.columns:
-        df[col] = pd.to_numeric(df[col], errors="raise")
+    df = pd.read_csv(PHENOTYPE_TABLE_FILE, sep="\t", index_col=0, dtype=float)
 
     # Get phenotype names from column headers
     phenotype_names = df.columns.tolist()
@@ -56,16 +52,12 @@ if __name__ == "__main__":
     for phenotype in phenotype_names:
         phenotype_strains[phenotype] = {}
 
-    # Process each strain (row) and phenotype (column)
-    for strain in df.index:
-        for phenotype in phenotype_names:
-            value = df.loc[strain, phenotype]
-            if (
-                pd.notna(value)
-                and isinstance(value, (int, float))
-                and value > 0
-            ):
-                phenotype_strains[phenotype][strain] = float(value)
+    # Process each phenotype column
+    for phenotype in phenotype_names:
+        # Get strains where the phenotype value is > 0 (and not NaN)
+        positive_strains = df[df[phenotype] > 0][phenotype]
+        for strain, value in positive_strains.items():
+            phenotype_strains[phenotype][strain] = value
 
     print(f"Total strains in {PHENOTYPE_TABLE_FILE}: {len(df)}")
     print(f"Phenotypes found: {phenotype_names}")
