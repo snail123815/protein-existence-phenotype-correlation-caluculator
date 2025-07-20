@@ -86,8 +86,14 @@ if __name__ == "__main__":
     CONCATENATED_PROTEOMES_FILE.parent.mkdir(exist_ok=True)
 
     print("Making database fasta:")
+    if CONCATENATED_PROTEOMES_FILE.exists():
+        print(f"Removing existing {CONCATENATED_PROTEOMES_FILE}.")
+        CONCATENATED_PROTEOMES_FILE.unlink()
+    CONCATENATED_PROTEOMES_FILE.touch()
     for phenotype_name, strains in phenotype_strains.items():
-        with CONCATENATED_PROTEOMES_FILE.open("at") as db_handle:
+        with CONCATENATED_PROTEOMES_FILE.open(
+            "at", encoding="utf-8"
+        ) as db_handle:
             for st in tqdm(strains, desc=phenotype_name):
                 proteome_p = strains[st]
                 with gzip.open(strains[st], "rt") as source:
