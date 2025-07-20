@@ -7,6 +7,7 @@
 import gzip
 import pickle
 import re
+from pathlib import Path
 
 import pandas as pd
 from Bio import SeqIO
@@ -101,35 +102,40 @@ if __name__ == "__main__":
 
     # Find proteome files for each strain in each phenotype
     continue_all_missing = False  # Flag to auto-continue for all missing files
-    for phenotype_name, strains in phenotype_strains.items():
-        for st in list(strains.keys()):
-            found = False
-            for f in SOURCE_DATABASE_DIR.glob("*.faa.gz"):
-                if st in re.split(r"_|\.", f.name):
-                    strains[st] = f
-                    # print(f'Strain {st} path {f}')
-                    found = True
-                    try:
-                        (TEMP_PROTEOMICS_IN_TABLE_DIR / f.name).symlink_to(
-                            f.relative_to(
-                                TEMP_PROTEOMICS_IN_TABLE_DIR, walk_up=True
-                            )
+    all_strains: dict[str, Path] = {}  # Store all strains for later use
+    for st in list(df.index):
+        found = False
+        for f in SOURCE_DATABASE_DIR.glob("*.faa.gz"):
+            if st in re.split(r"_|\.", f.name):
+                # print(f'Strain {st} path {f}')
+                found = True
+                # Create a symlink in TEMP_PROTEOMICS_IN_TABLE_DIR
+                symlink_path = TEMP_PROTEOMICS_IN_TABLE_DIR / f.name
+                try:
+                    symlink_path.symlink_to(
+                        f.relative_to(
+                            TEMP_PROTEOMICS_IN_TABLE_DIR, walk_up=True
                         )
-                    except FileExistsError:
-                        pass
-                    break
-            if not found:
-                continue_anyway = True
-                if not continue_all_missing:
-                    continue_anyway = handle_missing_proteome(st)
-                    if continue_anyway is False:
-                        # User chose to exit
-                        exit(1)
-                    elif continue_anyway == "all":
-                        continue_all_missing = True
-                if continue_anyway or continue_all_missing:
-                    print(f"Skipping strain {st} (missing proteome).")
-                    strains.pop(st)
+                    )
+                except FileExistsError:
+                    pass
+                all_strains[st] = symlink_path
+                break
+        if not found:
+            continue_anyway = True
+            if not continue_all_missing:
+                continue_anyway = handle_missing_proteome(st)
+                if continue_anyway is False:
+                    # User chose to exit
+                    exit(1)
+                elif continue_anyway == "all":
+                    continue_all_missing = True
+            if continue_anyway or continue_all_missing:
+                print(f"Skipping strain {st} (missing proteome).")
+                all_strains.pop(st, None)
+                for phenotype, strains in phenotype_strains.items():
+                    if st in strains:
+                        phenotype_strains[phenotype].pop(st, None)
 
     CONCATENATED_PROTEOMES_FILE.parent.mkdir(exist_ok=True)
 
@@ -138,20 +144,16 @@ if __name__ == "__main__":
         print(f"Removing existing {CONCATENATED_PROTEOMES_FILE}.")
         CONCATENATED_PROTEOMES_FILE.unlink()
     CONCATENATED_PROTEOMES_FILE.touch()
-    for phenotype_name, strains in phenotype_strains.items():
-        with CONCATENATED_PROTEOMES_FILE.open(
-            "at", encoding="utf-8"
-        ) as db_handle:
-            for st in tqdm(strains, desc=phenotype_name):
-                proteome_p = strains[st]
-                with gzip.open(strains[st], "rt") as source:
-                    prots = []
-                    for prot in SeqIO.parse(source, "fasta"):
-                        prot.id = f"{st}_{prot.id}"
-                        if len(prot) < MIN_PROTEIN_LEN:
-                            continue
-                        prots.append(prot)
-                    SeqIO.write(prots, db_handle, "fasta")
+    with CONCATENATED_PROTEOMES_FILE.open("at", encoding="utf-8") as db_handle:
+        for st, proteome_p in tqdm(all_strains.items()):
+            with gzip.open(proteome_p, "rt") as source:
+                prots = []
+                for prot in SeqIO.parse(source, "fasta"):
+                    prot.id = f"{st}_{prot.id}"
+                    if len(prot) < MIN_PROTEIN_LEN:
+                        continue
+                    prots.append(prot)
+                SeqIO.write(prots, db_handle, "fasta")
 
     print(f"Database fasta file {CONCATENATED_PROTEOMES_FILE}.")
     if STRAINS_PICKLE_FILE.exists():
