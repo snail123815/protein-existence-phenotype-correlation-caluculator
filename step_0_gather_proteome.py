@@ -73,7 +73,12 @@ if __name__ == "__main__":
         TEMP_PROTEOMICS_IN_TABLE_DIR.mkdir()
 
     # Read the TSV file using pandas
-    df = pd.read_csv(PHENOTYPE_TABLE_FILE, sep="\t", index_col=0, dtype=float)
+    df = pd.read_csv(
+        PHENOTYPE_TABLE_FILE,
+        sep="\t",
+        index_col=0,
+    )
+    df = df.astype(float)
 
     # Get phenotype names from column headers
     phenotype_names = df.columns.tolist()
@@ -89,7 +94,7 @@ if __name__ == "__main__":
         for strain, value in positive_strains.items():
             phenotype_strains[phenotype][strain] = value
 
-    print(f"Total strains in {PHENOTYPE_TABLE_FILE}: {len(df)}")
+    print(f"Total strains in {PHENOTYPE_TABLE_FILE}: {df.shape[0]}")
     print(f"Phenotypes found: {phenotype_names}")
     for phenotype, strains in phenotype_strains.items():
         print(f"  {phenotype}: {len(strains)} strains")
@@ -104,11 +109,14 @@ if __name__ == "__main__":
                     strains[st] = f
                     # print(f'Strain {st} path {f}')
                     found = True
-                    (TEMP_PROTEOMICS_IN_TABLE_DIR / f.name).symlink_to(
-                        f.relative_to(
-                            TEMP_PROTEOMICS_IN_TABLE_DIR, walk_up=True
+                    try:
+                        (TEMP_PROTEOMICS_IN_TABLE_DIR / f.name).symlink_to(
+                            f.relative_to(
+                                TEMP_PROTEOMICS_IN_TABLE_DIR, walk_up=True
+                            )
                         )
-                    )
+                    except FileExistsError:
+                        pass
                     break
             if not found:
                 continue_anyway = True
