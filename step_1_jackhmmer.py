@@ -20,13 +20,16 @@ REF_NEXT_LOC = 0
 
 if __name__ == "__main__":
     with STRAINS_PICKLE_FILE.open("rb") as sp:
-        strains_paths_dict = pickle.load(sp)
+        phenotype_strains, all_strains = pickle.load(sp)
 
-    strains_doubleconj = strains_paths_dict["Double conj."]
-    strains_singleconj = strains_paths_dict["Single conj."]
-    strains_noconj = strains_paths_dict["No conj."]
+    for st in all_strains:
+        if st == TARGET_STRAIN:
+            ref_proteome_p = all_strains[st]
+            break
+    for phenotype, strains in phenotype_strains.items():
+        for st in strains.items():
+            pass
 
-    ref_proteome_p = strains_doubleconj[TARGET_STRAIN]
     with gzip.open(ref_proteome_p, "rt") as ref:
         ref.seek(REF_NEXT_LOC)
         jackhmmer_run = run(

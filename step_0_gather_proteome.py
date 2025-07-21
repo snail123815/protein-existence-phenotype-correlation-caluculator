@@ -160,4 +160,4 @@ if __name__ == "__main__":
         STRAINS_PICKLE_FILE.unlink()
     STRAINS_PICKLE_FILE.touch()
     with STRAINS_PICKLE_FILE.open("wb") as sp:
-        pickle.dump(phenotype_strains, sp)
+        pickle.dump((phenotype_strains, all_strains), sp)
