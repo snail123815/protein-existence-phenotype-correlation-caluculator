@@ -64,7 +64,7 @@ def handle_missing_proteome(strain_name):
 if __name__ == "__main__":
     # Dictionary to store strains for each phenotype
     # Structure: {"Phenotype1": {"strain1": "", "strain2": ""}, ...}
-    phenotype_strains = {}
+    phenotype_strains: dict[str, dict[str, float]] = {}
 
     # Remove all files in TEMP_PROTEOMICS_IN_TABLE_DIR
     if TEMP_PROTEOMICS_IN_TABLE_DIR.exists():
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     for phenotype in phenotype_names:
         # Get strains where the phenotype value is > 0 (and not NaN)
         positive_strains = df[df[phenotype] > 0][phenotype]
-        for strain, value in positive_strains.items():
+        for strain, value in positive_strains.to_dict().items():
             phenotype_strains[phenotype][strain] = value
 
     print(f"Total strains in {PHENOTYPE_TABLE_FILE}: {df.shape[0]}")
