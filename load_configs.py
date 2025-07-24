@@ -22,12 +22,8 @@ NCPU = int(project_config["NCPU"])
 TARGET_STRAIN = str(project_config["TARGET_STRAIN"])
 PHENOTYPE_TABLE_FILE = Path(project_config["PHENOTYPE_TABLE_FILE"])
 SOURCE_DATABASE_DIR = Path(project_config["SOURCE_DATABASE_DIR"])
-TEMP_PROTEOMICS_IN_TABLE_DIR = Path(
-    project_config["TEMP_PROTEOMICS_IN_TABLE_DIR"]
-)
-CONCATENATED_PROTEOMES_FILE = Path(
-    project_config["CONCATENATED_PROTEOMES_FILE"]
-)
+TEMP_PROTEOMICS_IN_TABLE_DIR = Path(project_config["TEMP_PROTEOMICS_IN_TABLE_DIR"])
+CONCATENATED_PROTEOMES_FILE = Path(project_config["CONCATENATED_PROTEOMES_FILE"])
 STRAINS_PICKLE_FILE = Path(project_config["STRAINS_PICKLE_FILE"])
 DOMTBLOUT_FILE = Path(project_config["DOMTBLOUT_FILE"])
 
@@ -39,4 +35,4 @@ GATHER_MATCH_TSV = DOMTBLOUT_FILE.parent / (
     f"{DOMTBLOUT_FILE.stem}_matches_E{str(GATHER_T_E)}"
     f"_DOME{str(GATHER_T_DOME)}_COV{str(GATHER_T_COV)}_LDIF{str(LEN_DIFF)}.tsv"
 )
-PRESENCE_TSV = Path(f"{GATHER_MATCH_TSV.stem}_presence.tsv")
+PRESENCE_TSV = Path(GATHER_MATCH_TSV.parent / f"presence_{GATHER_MATCH_TSV.stem}.tsv")
