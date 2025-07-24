@@ -8,18 +8,18 @@ with open(Path(__file__).parent / "config_jackhmmer_thresholds.yaml") as f:
 with open(Path(__file__).parent / "config_project.yaml") as f:
     project_config = yaml.safe_load(f)
 
-MIN_PROTEIN_LEN = thresholds_config["MIN_PROTEIN_LEN"]
-T_E = thresholds_config["T_E"]
-T_INCE = thresholds_config["T_INCE"]
-T_DOME = thresholds_config["T_DOME"]
-T_INCDOME = thresholds_config["T_INCDOME"]
-GATHER_T_E = thresholds_config["GATHER_T_E"]
-GATHER_T_DOME = thresholds_config["GATHER_T_DOME"]
-GATHER_T_COV = thresholds_config["GATHER_T_COV"]
-LEN_DIFF = thresholds_config["LEN_DIFF"]
+MIN_PROTEIN_LEN = int(thresholds_config["MIN_PROTEIN_LEN"])
+T_E = float(thresholds_config["T_E"])
+T_INCE = float(thresholds_config["T_INCE"])
+T_DOME = float(thresholds_config["T_DOME"])
+T_INCDOME = float(thresholds_config["T_INCDOME"])
+GATHER_T_E = float(thresholds_config["GATHER_T_E"])
+GATHER_T_DOME = float(thresholds_config["GATHER_T_DOME"])
+GATHER_T_COV = float(thresholds_config["GATHER_T_COV"])
+LEN_DIFF = float(thresholds_config["LEN_DIFF"])
 
-NCPU = project_config["NCPU"]
-TARGET_STRAIN = project_config["TARGET_STRAIN"]
+NCPU = int(project_config["NCPU"])
+TARGET_STRAIN = str(project_config["TARGET_STRAIN"])
 PHENOTYPE_TABLE_FILE = Path(project_config["PHENOTYPE_TABLE_FILE"])
 SOURCE_DATABASE_DIR = Path(project_config["SOURCE_DATABASE_DIR"])
 TEMP_PROTEOMICS_IN_TABLE_DIR = Path(
