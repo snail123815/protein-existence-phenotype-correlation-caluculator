@@ -31,13 +31,6 @@ from load_configs import (
     NCPU,
 )
 
-# DOMTBLOUT_P = Path("domtblout_nodup.txt")
-# DOMTBLOUT_P = Path("domtblout_partial.txt")
-# DOMTBLOUT_P = Path("domtblout_partial_nodup.txt")
-
-
-# Output pathes
-
 
 def cal_cov(line: dict, dom_cov_regions: list[int]):
     """
@@ -186,7 +179,7 @@ def process_single_query(domtbl_q: list[OrderedDict]):
 
 def parse_dom_table_mt(domtbl_df):
     previous_qp = ""
-    domtbl_q: list[namedtuple] = []
+    domtbl_q: list[OrderedDict] = []
     with ProcessPoolExecutor(NCPU) as executer:
         futures = []
         for domrow in tqdm(
