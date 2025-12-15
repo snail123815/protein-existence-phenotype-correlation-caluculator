@@ -68,7 +68,7 @@ def cal_correlation(
     presence_df: pd.DataFrame,
 ) -> pd.DataFrame:
     phenotype_vector = (
-        pd.Series(phenotype_strains[phenotype], index=list(all_strains.keys()))
+        pd.Series(phenotype_strains[phenotype], index=sorted(list(all_strains.keys())))
         .fillna(0.0)
         .to_numpy(dtype=float)
     )
@@ -76,6 +76,9 @@ def cal_correlation(
     correlation_dict = {}
     is_binary = False
     print(f"\nCalculating correlation for {phenotype} phenotype.")
+    # Columns already sorted but just to be sure
+    presence_df = presence_df[sorted(presence_df.columns)]
+
     for gene, presence_data in tqdm(
         presence_df.iterrows(), desc="Processing genes", total=presence_df.shape[0]
     ):
