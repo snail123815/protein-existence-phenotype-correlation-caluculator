@@ -1,5 +1,7 @@
 # Protein existence and strain Phenotype correlation calculator
 
+Own implementation of bacterial GWAS (genome-wide association study).
+
 Simple correlation calculator, given
 1. A phenotype table
    - Test strain with target phenotype
