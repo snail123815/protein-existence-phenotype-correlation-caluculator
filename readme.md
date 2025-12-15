@@ -1,6 +1,6 @@
 # Protein existence and strain Phenotype correlation calculator
 
-Own implementation of bacterial GWAS (genome-wide association study).
+Own implementation of bacterial GWAS (genome-wide association study). Try Pyseer (https://github.com/mgalardini/pyseer) for the same or better function.
 
 Simple correlation calculator, given
 1. A phenotype table
